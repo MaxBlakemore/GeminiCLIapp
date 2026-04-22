@@ -56,6 +56,27 @@ def calculate_roi(request: schemas.ROICalculationRequest, db: Session = Depends(
     
     return result
 
+@app.post("/ask-finance")
+def ask_finance(request: dict, db: Session = Depends(get_db)):
+    car_id = request.get("car_id")
+    question = request.get("question", "").lower()
+    
+    car = db.query(models.Car).filter(models.Car.id == car_id).first()
+    if not car:
+        raise HTTPException(status_code=404, detail="Car not found")
+
+    # Rule-based response logic to simulate an AI advisor
+    if "credit card" in question:
+        response = f"Using a 0% credit card for this {car.make} is a great move if you're borrowing less than $10k. Since this car is ${car.price:,.0f}, you could put a large down payment and put the remaining balance on the card to avoid all interest."
+    elif "pcp" in question:
+        response = f"PCP for the {car.model} depends on its resale value. With a {car.depreciation_rate}% depreciation rate, your monthly payments will be lower than HP, but you won't own the car at the end unless you pay the 'balloon' payment."
+    elif "bank loan" in question:
+        response = f"A personal bank loan is usually the 'middle ground'. You'll own the {car.make} outright from day one, and for a ${car.price:,.0f} car, you can likely get a better rate (5-7%) than the dealership's HP offer."
+    else:
+        response = f"That's a good question about the {car.make} {car.model}. Generally, for a car priced at ${car.price:,.0f}, we recommend comparing a low-interest bank loan against any dealership incentives. Would you like to know more about PCP or HP specifically?"
+
+    return {"answer": response}
+
 @app.get("/alternatives/{car_id}", response_model=List[schemas.Car])
 def get_alternatives(car_id: int, db: Session = Depends(get_db)):
     base_car = db.query(models.Car).filter(models.Car.id == car_id).first()
