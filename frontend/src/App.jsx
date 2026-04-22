@@ -55,7 +55,6 @@ function App() {
   };
 
   const openCarDetail = (car) => {
-  const openCarDetail = (car) => {
     setSelectedCar(car);
     setRoiResult(null);
     handleCalculateROI(car);
@@ -340,5 +339,4 @@ const GuidesView = () => (
   </div>
 );
 
-export default App;
 export default App;
