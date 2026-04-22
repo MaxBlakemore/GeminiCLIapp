@@ -7,7 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Car ROI Optimizer API")
+app = FastAPI(title="Wheels Brought Smarter API")
+
+@app.on_event("startup")
+def startup_event():
+    db = next(get_db())
+    seed_data(db)
 
 app.add_middleware(
     CORSMiddleware,
