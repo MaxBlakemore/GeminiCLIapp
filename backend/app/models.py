@@ -22,6 +22,9 @@ class Car(Base):
     depreciation_rate = Column(Float)  # annual %
     est_maintenance_yearly = Column(Float)
     image_url = Column(String, nullable=True)
+    body_type = Column(String, nullable=True) # e.g., SUV, Hatchback
+    fuel_type = Column(String, nullable=True) # e.g., Petrol, Electric
+    transmission = Column(String, nullable=True) # e.g., Automatic, Manual
 
 def get_db():
     db = SessionLocal()

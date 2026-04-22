@@ -10,6 +10,9 @@ class CarBase(BaseModel):
     depreciation_rate: float
     est_maintenance_yearly: float
     image_url: Optional[str] = None
+    body_type: Optional[str] = None
+    fuel_type: Optional[str] = None
+    transmission: Optional[str] = None
 
 class CarCreate(CarBase):
     pass
@@ -35,3 +38,5 @@ class ROIResult(BaseModel):
     remaining_loan_balance: float
     total_cost_of_ownership: float
     net_resale_value: float
+    purchase_advice: Optional[str] = None
+    financing_options: Optional[List[dict]] = None

@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Car, Calculator, TrendingUp, Info } from 'lucide-react';
+import { 
+  Car, 
+  Search, 
+  Filter, 
+  ChevronRight, 
+  TrendingUp, 
+  Zap, 
+  ShieldCheck, 
+  CreditCard, 
+  Banknote,
+  X,
+  ArrowRight,
+  Info
+} from 'lucide-react';
 
 const API_URL = 'http://localhost:8000';
 
@@ -8,217 +21,296 @@ function App() {
   const [cars, setCars] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
   const [roiResult, setRoiResult] = useState(null);
-  const [alternatives, setAlternatives] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    make: '',
+    max_price: '',
+    body_type: ''
+  });
   const [financeInputs, setFinanceInputs] = useState({
     down_payment: 5000,
-    interest_rate: 5.5,
-    loan_years: 5,
+    interest_rate: 6.9,
+    loan_years: 4,
     hold_years: 3
   });
 
   useEffect(() => {
-    fetchCars();
+    handleSearch();
   }, []);
 
-  const fetchCars = async () => {
+  const handleSearch = async (e) => {
+    if (e) e.preventDefault();
+    setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/cars`);
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('query', searchQuery);
+      if (filters.make) params.append('make', filters.make);
+      if (filters.max_price) params.append('max_price', filters.max_price);
+      if (filters.body_type) params.append('body_type', filters.body_type);
+
+      const response = await axios.get(`${API_URL}/search?${params.toString()}`);
       setCars(response.data);
-      if (response.data.length === 0) {
-        // Seed data if empty
+      
+      if (response.data.length === 0 && !searchQuery && !filters.make) {
         await axios.post(`${API_URL}/seed`);
         const reFetch = await axios.get(`${API_URL}/cars`);
         setCars(reFetch.data);
       }
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching cars:", error);
+      console.error("Search error:", error);
       setLoading(false);
     }
   };
 
-  const handleCalculateROI = async (carId) => {
+  const handleCalculateROI = async (car) => {
     try {
       const response = await axios.post(`${API_URL}/calculate-roi`, {
-        car_id: carId,
+        car_id: car.id,
         ...financeInputs
       });
       setRoiResult(response.data);
-      
-      const altResponse = await axios.get(`${API_URL}/alternatives/${carId}`);
-      setAlternatives(altResponse.data);
     } catch (error) {
-      console.error("Error calculating ROI:", error);
+      console.error("ROI error:", error);
     }
   };
 
-  const handleSelectCar = (car) => {
+  const openCarDetail = (car) => {
     setSelectedCar(car);
     setRoiResult(null);
-    setAlternatives([]);
+    handleCalculateROI(car);
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading Marketplace...</div>;
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-blue-600 text-white p-4 shadow-md">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Car /> SmartCar ROI
-          </h1>
-          <nav>
-            <button className="bg-blue-700 px-4 py-2 rounded-lg hover:bg-blue-800 transition">Login</button>
+    <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-indigo-500/30">
+      {/* Header */}
+      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+          <div className="flex items-center gap-3 group cursor-pointer">
+            <div className="bg-indigo-600 p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-lg shadow-indigo-500/20">
+              <Car className="text-white" size={24} />
+            </div>
+            <h1 className="text-xl font-black tracking-tight text-white uppercase">
+              Wheels <span className="text-indigo-400 font-medium lowercase italic">Brought Smarter</span>
+            </h1>
+          </div>
+          <nav className="hidden md:flex gap-8 text-sm font-medium text-slate-400">
+            <a href="#" className="hover:text-white transition">Marketplace</a>
+            <a href="#" className="hover:text-white transition">ROI Calculator</a>
+            <a href="#" className="hover:text-white transition">Financing Guides</a>
           </nav>
+          <button className="bg-white text-slate-900 px-5 py-2.5 rounded-full text-sm font-bold hover:bg-slate-200 transition shadow-xl">
+            Sign In
+          </button>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Car List */}
-        <div className="md:col-span-1 bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-          <div className="p-4 bg-gray-50 border-b border-gray-200 font-semibold">Vehicle Marketplace</div>
-          <div className="divide-y divide-gray-100 overflow-y-auto max-h-[70vh]">
-            {cars.map(car => (
-              <div 
-                key={car.id} 
-                className={`p-4 cursor-pointer hover:bg-blue-50 transition ${selectedCar?.id === car.id ? 'bg-blue-50 border-l-4 border-blue-600' : ''}`}
-                onClick={() => handleSelectCar(car)}
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* Hero & Search Section */}
+        <section className="mb-16 text-center max-w-3xl mx-auto">
+          <h2 className="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
+            Stop guessing. <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Buy with data.</span>
+          </h2>
+          <p className="text-slate-400 text-lg mb-10">
+            Calculate long-term depreciation, total cost of ownership, and find the smartest way to pay—all in one place.
+          </p>
+
+          <form onSubmit={handleSearch} className="relative group max-w-2xl mx-auto">
+            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors">
+              <Search size={22} />
+            </div>
+            <input 
+              type="text" 
+              placeholder="Try 'Fast electric SUV' or 'Toyota under $30k'..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-2xl py-5 pl-14 pr-32 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-2xl"
+            />
+            <button 
+              type="submit"
+              className="absolute right-3 top-2.5 bottom-2.5 bg-indigo-600 text-white px-6 rounded-xl font-bold hover:bg-indigo-500 transition flex items-center gap-2"
+            >
+              Search
+            </button>
+          </form>
+
+          {/* Quick Filters */}
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            {['SUV', 'Hatchback', 'Electric', 'Sedan'].map(tag => (
+              <button 
+                key={tag}
+                onClick={() => {setSearchQuery(tag); handleSearch();}}
+                className="bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-full text-xs font-medium hover:border-slate-500 transition text-slate-300"
               >
-                <div className="font-bold">{car.make} {car.model}</div>
-                <div className="text-sm text-gray-500">{car.year} • ${car.price.toLocaleString()}</div>
-                <div className="text-xs text-blue-600 mt-1">ROI: {car.depreciation_rate}% Deprec./Yr</div>
-              </div>
+                {tag}
+              </button>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Details & ROI Calculator */}
-        <div className="md:col-span-2 space-y-6">
-          {selectedCar ? (
-            <>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h2 className="text-3xl font-bold text-gray-800">{selectedCar.make} {selectedCar.model}</h2>
-                    <p className="text-gray-500">{selectedCar.year} • {selectedCar.mileage.toLocaleString()} miles</p>
-                  </div>
-                  <div className="text-2xl font-bold text-blue-600">${selectedCar.price.toLocaleString()}</div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <span className="text-xs text-gray-400 block uppercase">Est. Maintenance / Yr</span>
-                    <span className="font-semibold text-gray-700">${selectedCar.est_maintenance_yearly}</span>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <span className="text-xs text-gray-400 block uppercase">Depreciation Rate</span>
-                    <span className="font-semibold text-gray-700 text-orange-600">{selectedCar.depreciation_rate}% / Yr</span>
+        {/* Results Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {loading ? (
+            Array(6).fill(0).map((_, i) => (
+              <div key={i} className="h-80 bg-slate-800/40 rounded-3xl animate-pulse"></div>
+            ))
+          ) : cars.length > 0 ? (
+            cars.map(car => (
+              <div 
+                key={car.id} 
+                className="group bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-indigo-500/50 transition-all hover:shadow-2xl hover:shadow-indigo-500/10 cursor-pointer flex flex-col"
+                onClick={() => openCarDetail(car)}
+              >
+                <div className="h-48 bg-slate-800 relative flex items-center justify-center">
+                  <Car size={64} className="text-slate-700 group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute top-4 right-4 bg-slate-900/80 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-indigo-400 uppercase tracking-widest border border-indigo-500/30">
+                    {car.body_type || 'Vehicle'}
                   </div>
                 </div>
-
-                <div className="border-t pt-4">
-                  <h3 className="font-semibold mb-3 flex items-center gap-2"><Calculator size={18} /> Financing Inputs</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-6 flex-1 flex flex-col">
+                  <div className="flex justify-between items-start mb-2">
                     <div>
-                      <label className="text-xs font-medium text-gray-500">Down Payment</label>
-                      <input 
-                        type="number" 
-                        value={financeInputs.down_payment}
-                        onChange={(e) => setFinanceInputs({...financeInputs, down_payment: parseInt(e.target.value)})}
-                        className="w-full border rounded p-1 text-sm"
-                      />
+                      <h3 className="text-xl font-bold text-white leading-tight">{car.make} {car.model}</h3>
+                      <p className="text-slate-500 text-sm">{car.year} • {car.mileage.toLocaleString()} miles</p>
                     </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500">Int. Rate (%)</label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        value={financeInputs.interest_rate}
-                        onChange={(e) => setFinanceInputs({...financeInputs, interest_rate: parseFloat(e.target.value)})}
-                        className="w-full border rounded p-1 text-sm"
-                      />
+                    <div className="text-xl font-black text-white">${car.price.toLocaleString()}</div>
+                  </div>
+                  
+                  <div className="mt-auto pt-6 flex items-center justify-between border-t border-slate-800">
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <TrendingUp size={16} />
+                      <span className="text-sm font-bold">{car.depreciation_rate}% Deprec./Yr</span>
                     </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500">Loan Yrs</label>
-                      <input 
-                        type="number" 
-                        value={financeInputs.loan_years}
-                        onChange={(e) => setFinanceInputs({...financeInputs, loan_years: parseInt(e.target.value)})}
-                        className="w-full border rounded p-1 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500">Hold Yrs</label>
-                      <input 
-                        type="number" 
-                        value={financeInputs.hold_years}
-                        onChange={(e) => setFinanceInputs({...financeInputs, hold_years: parseInt(e.target.value)})}
-                        className="w-full border rounded p-1 text-sm"
-                      />
+                    <div className="flex items-center gap-1 text-slate-400 text-sm group-hover:text-white transition">
+                      View ROI <ChevronRight size={16} />
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleCalculateROI(selectedCar.id)}
-                    className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition"
-                  >
-                    Calculate Long-Term ROI
-                  </button>
                 </div>
               </div>
-
-              {roiResult && (
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-green-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><TrendingUp className="text-green-600" /> Ownership Projections</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-6">
-                    <div className="text-center p-4 bg-green-50 rounded-xl">
-                      <div className="text-xs text-green-600 uppercase font-bold mb-1">Monthly Payment</div>
-                      <div className="text-2xl font-bold">${roiResult.monthly_payment}</div>
-                    </div>
-                    <div className="text-center p-4 bg-orange-50 rounded-xl">
-                      <div className="text-xs text-orange-600 uppercase font-bold mb-1">Total Cost ({financeInputs.hold_years}yrs)</div>
-                      <div className="text-2xl font-bold">${roiResult.total_cost_of_ownership.toLocaleString()}</div>
-                      <p className="text-[10px] text-gray-400 mt-1">Includes int, maint & deprec.</p>
-                    </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-xl">
-                      <div className="text-xs text-blue-600 uppercase font-bold mb-1">Future Resale</div>
-                      <div className="text-2xl font-bold">${roiResult.estimated_resale_value.toLocaleString()}</div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 p-4 rounded-lg flex gap-4 items-center">
-                    <Info className="text-blue-500" />
-                    <p className="text-sm text-gray-600">
-                      Buying this car will cost you an average of <strong>${Math.round(roiResult.total_cost_of_ownership / (financeInputs.hold_years * 12))}</strong> per month in total ownership costs over {financeInputs.hold_years} years.
-                    </p>
-                  </div>
-
-                  {alternatives.length > 0 && (
-                    <div className="mt-8">
-                      <h4 className="font-bold text-gray-700 mb-3 uppercase text-xs tracking-wider">Smarter Alternatives (Better Depreciation)</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {alternatives.map(alt => (
-                          <div key={alt.id} className="p-3 border rounded-lg hover:border-blue-300 transition cursor-pointer" onClick={() => handleSelectCar(alt)}>
-                            <div className="font-bold text-sm">{alt.make} {alt.model}</div>
-                            <div className="text-xs text-green-600">{alt.depreciation_rate}% Depreciation</div>
-                            <div className="text-xs text-gray-400">${alt.price.toLocaleString()}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
+            ))
           ) : (
-            <div className="bg-white h-full min-h-[400px] flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed border-gray-200 text-gray-400">
-              <Car size={64} className="mb-4 opacity-20" />
-              <p className="text-xl font-medium">Select a car to analyze your ROI</p>
-              <p className="text-sm">Compare financing options and long-term depreciation.</p>
+            <div className="col-span-full py-20 text-center text-slate-500">
+              No cars found matching your request. Try another search.
             </div>
           )}
         </div>
       </main>
+
+      {/* Side Detail Panel / Modal */}
+      {selectedCar && (
+        <div className="fixed inset-0 z-[100] flex justify-end">
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setSelectedCar(null)}></div>
+          <div className="relative w-full max-w-2xl bg-slate-900 h-full shadow-2xl overflow-y-auto border-l border-slate-800 animate-in slide-in-from-right duration-300">
+            <div className="p-8">
+              <button 
+                onClick={() => setSelectedCar(null)}
+                className="absolute top-6 right-6 p-2 text-slate-400 hover:text-white bg-slate-800 rounded-full transition"
+              >
+                <X size={24} />
+              </button>
+
+              <div className="mb-8">
+                <span className="text-indigo-400 text-xs font-black uppercase tracking-[0.2em] mb-2 block">Optimization Report</span>
+                <h2 className="text-4xl font-black text-white">{selectedCar.make} {selectedCar.model}</h2>
+                <p className="text-slate-400 mt-1">{selectedCar.year} • {selectedCar.fuel_type} • {selectedCar.transmission}</p>
+              </div>
+
+              {roiResult ? (
+                <div className="space-y-10">
+                  {/* Financing Advice Section */}
+                  <div className="bg-indigo-600/10 border border-indigo-500/30 rounded-3xl p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-indigo-600 p-2 rounded-lg">
+                        <Zap size={20} className="text-white fill-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-white">Smartest Purchase Strategy</h3>
+                    </div>
+                    <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                      {roiResult.purchase_advice}
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {roiResult.financing_options?.map((opt, i) => (
+                        <div key={i} className={`p-4 rounded-2xl border ${i === 0 ? 'bg-indigo-600 border-indigo-400 shadow-lg shadow-indigo-500/20' : 'bg-slate-800 border-slate-700'}`}>
+                          <div className="flex justify-between items-start mb-2">
+                            <span className={`text-[10px] font-black uppercase tracking-tighter ${i === 0 ? 'text-indigo-200' : 'text-slate-500'}`}>Match Score</span>
+                            <span className={`text-xs font-bold ${i === 0 ? 'text-white' : 'text-indigo-400'}`}>{opt.smart_score}%</span>
+                          </div>
+                          <div className={`font-bold text-sm ${i === 0 ? 'text-white' : 'text-slate-200'}`}>{opt.method}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ROI Stats Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-800">
+                      <span className="text-slate-500 text-xs font-bold uppercase tracking-widest block mb-2">Monthly Cost</span>
+                      <div className="text-3xl font-black text-white">${roiResult.monthly_payment}</div>
+                      <p className="text-slate-500 text-[10px] mt-2">Estimated at {financeInputs.interest_rate}% APR</p>
+                    </div>
+                    <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-800">
+                      <span className="text-slate-500 text-xs font-bold uppercase tracking-widest block mb-2">Total TCO (3yr)</span>
+                      <div className="text-3xl font-black text-white">${roiResult.total_cost_of_ownership.toLocaleString()}</div>
+                      <p className="text-slate-500 text-[10px] mt-2">Includes deprec, int, & maint.</p>
+                    </div>
+                  </div>
+
+                  {/* Future Value */}
+                  <div className="bg-slate-800/50 p-8 rounded-3xl border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <span className="text-slate-500 text-xs font-bold uppercase tracking-widest block mb-1">Estimated Future Value</span>
+                      <div className="text-2xl font-bold text-white">${roiResult.estimated_resale_value.toLocaleString()}</div>
+                    </div>
+                    <div className="h-16 w-16 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                      <TrendingUp size={28} />
+                    </div>
+                  </div>
+
+                  {/* Purchase Method Deep Dive */}
+                  <div className="space-y-4">
+                    <h3 className="text-white font-bold text-lg px-2">How to buy Outright</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="flex gap-4 p-5 bg-slate-800/30 border border-slate-800 rounded-3xl hover:border-slate-700 transition">
+                        <div className="h-12 w-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 flex-shrink-0">
+                          <Banknote />
+                        </div>
+                        <div>
+                          <h4 className="text-white font-bold mb-1 text-sm">Personal Bank Loan</h4>
+                          <p className="text-slate-400 text-xs leading-relaxed">Lower interest than PCP/HP. Best if borrowing over $10k. Current rates approx 5.9% - 7.5%.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-4 p-5 bg-slate-800/30 border border-slate-800 rounded-3xl hover:border-slate-700 transition">
+                        <div className="h-12 w-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-400 flex-shrink-0">
+                          <CreditCard />
+                        </div>
+                        <div>
+                          <h4 className="text-white font-bold mb-1 text-sm">0% Purchase Credit Card</h4>
+                          <p className="text-slate-400 text-xs leading-relaxed">Best for balances under $10k. Pay 0% interest for up to 24 months. Ensure you can clear balance before 0% ends.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-slate-600">
+                  <Zap className="animate-pulse mb-4" size={48} />
+                  <p className="text-lg">Crunching numbers...</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="sticky bottom-0 p-8 bg-slate-900/80 backdrop-blur border-t border-slate-800">
+              <button className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-500 transition shadow-2xl flex items-center justify-center gap-2">
+                Secure This Deal <ArrowRight size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

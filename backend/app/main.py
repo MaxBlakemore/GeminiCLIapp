@@ -44,6 +44,11 @@ def calculate_roi(request: schemas.ROICalculationRequest, db: Session = Depends(
         annual_depreciation=car.depreciation_rate,
         annual_maintenance=car.est_maintenance_yearly
     )
+    
+    advice, options = finance.get_purchase_advice(car.price, car.depreciation_rate, car.est_maintenance_yearly)
+    result["purchase_advice"] = advice
+    result["financing_options"] = options
+    
     return result
 
 @app.get("/alternatives/{car_id}", response_model=List[schemas.Car])
@@ -62,19 +67,61 @@ def get_alternatives(car_id: int, db: Session = Depends(get_db)):
     
     return alternatives
 
+@app.get("/search", response_model=List[schemas.Car])
+def search_cars(
+    query: str = None, 
+    make: str = None, 
+    max_price: float = None, 
+    body_type: str = None,
+    db: Session = Depends(get_db)
+):
+    results = db.query(models.Car)
+    
+    if query:
+        # Simple keyword matching for "chat" simulation
+        keywords = query.lower().split()
+        for kw in keywords:
+            results = results.filter(
+                (models.Car.make.ilike(f"%{kw}%")) | 
+                (models.Car.model.ilike(f"%{kw}%")) | 
+                (models.Car.body_type.ilike(f"%{kw}%")) |
+                (models.Car.fuel_type.ilike(f"%{kw}%"))
+            )
+            
+    if make:
+        results = results.filter(models.Car.make == make)
+    if max_price:
+        results = results.filter(models.Car.price <= max_price)
+    if body_type:
+        results = results.filter(models.Car.body_type == body_type)
+        
+    return results.limit(20).all()
+
 @app.post("/seed")
 def seed_data(db: Session = Depends(get_db)):
     # Simple seeder for development
     if db.query(models.Car).count() > 0:
-        return {"message": "Database already seeded"}
+        db.query(models.Car).delete() # Reset for now to ensure new fields are populated
     
     mock_cars = [
-        models.Car(make="Toyota", model="Camry", year=2022, price=28000, mileage=15000, depreciation_rate=12, est_maintenance_yearly=500),
-        models.Car(make="Honda", model="Accord", year=2022, price=29000, mileage=12000, depreciation_rate=13, est_maintenance_yearly=550),
-        models.Car(make="Tesla", model="Model 3", year=2021, price=35000, mileage=25000, depreciation_rate=15, est_maintenance_yearly=300),
-        models.Car(make="BMW", model="3 Series", year=2020, price=32000, mileage=35000, depreciation_rate=20, est_maintenance_yearly=1200),
-        models.Car(make="Lexus", model="ES", year=2021, price=38000, mileage=18000, depreciation_rate=10, est_maintenance_yearly=700),
-        models.Car(make="Ford", model="F-150", year=2021, price=45000, mileage=30000, depreciation_rate=14, est_maintenance_yearly=900),
+        # Premium SUVs
+        models.Car(make="Range Rover", model="Sport", year=2022, price=75000, mileage=12000, depreciation_rate=18, est_maintenance_yearly=1500, body_type="SUV", fuel_type="Diesel", transmission="Automatic"),
+        models.Car(make="BMW", model="X5", year=2021, price=55000, mileage=22000, depreciation_rate=15, est_maintenance_yearly=1200, body_type="SUV", fuel_type="Hybrid", transmission="Automatic"),
+        models.Car(make="Tesla", model="Model Y", year=2022, price=48000, mileage=8000, depreciation_rate=12, est_maintenance_yearly=300, body_type="SUV", fuel_type="Electric", transmission="Automatic"),
+        
+        # Family Saloons/Hatchbacks
+        models.Car(make="Toyota", model="Camry", year=2022, price=28000, mileage=15000, depreciation_rate=10, est_maintenance_yearly=500, body_type="Sedan", fuel_type="Hybrid", transmission="Automatic"),
+        models.Car(make="Honda", model="Civic", year=2023, price=26000, mileage=5000, depreciation_rate=9, est_maintenance_yearly=400, body_type="Hatchback", fuel_type="Petrol", transmission="Manual"),
+        models.Car(make="Volkswagen", model="Golf", year=2021, price=22000, mileage=18000, depreciation_rate=13, est_maintenance_yearly=600, body_type="Hatchback", fuel_type="Petrol", transmission="Automatic"),
+        
+        # Budget Options
+        models.Car(make="Ford", model="Fiesta", year=2019, price=9500, mileage=45000, depreciation_rate=14, est_maintenance_yearly=450, body_type="Hatchback", fuel_type="Petrol", transmission="Manual"),
+        models.Car(make="Dacia", model="Sandero", year=2021, price=8500, mileage=12000, depreciation_rate=11, est_maintenance_yearly=300, body_type="Hatchback", fuel_type="Petrol", transmission="Manual"),
+        models.Car(make="Hyundai", model="i10", year=2020, price=7500, mileage=30000, depreciation_rate=12, est_maintenance_yearly=350, body_type="Hatchback", fuel_type="Petrol", transmission="Manual"),
+        
+        # Performance / Fun
+        models.Car(make="Porsche", model="911", year=2020, price=95000, mileage=15000, depreciation_rate=8, est_maintenance_yearly=2500, body_type="Coupe", fuel_type="Petrol", transmission="Automatic"),
+        models.Car(make="Mazda", model="MX-5", year=2021, price=24000, mileage=10000, depreciation_rate=11, est_maintenance_yearly=500, body_type="Convertible", fuel_type="Petrol", transmission="Manual"),
     ]
     db.add_all(mock_cars)
     db.commit()

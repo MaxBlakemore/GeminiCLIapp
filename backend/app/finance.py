@@ -58,3 +58,29 @@ def estimate_tco_and_roi(
         "total_cost_of_ownership": round(tco, 2),
         "net_resale_value": round(net_resale, 2)
     }
+
+def get_purchase_advice(car_price: float, depreciation_rate: float, annual_maintenance: float):
+    options = []
+    
+    # 1. Outright (Credit Card / Cash)
+    if car_price < 8000:
+        advice = f"Since this car is relatively affordable (${car_price:,.0f}), the smartest way is often a 0% purchase credit card or cash. You'll avoid all interest and own it immediately."
+        options.append({"method": "Outright / 0% Card", "smart_score": 95, "desc": "No interest, full ownership."})
+    else:
+        advice = f"For a vehicle at ${car_price:,.0f}, a low-interest personal bank loan (usually 5-7%) is typically cheaper than dealership financing."
+        options.append({"method": "Personal Bank Loan", "smart_score": 85, "desc": "Lower interest than dealers."})
+
+    # 2. HP (Hire Purchase)
+    hp_score = 70 if depreciation_rate > 15 else 60
+    options.append({"method": "Hire Purchase (HP)", "smart_score": hp_score, "desc": "Pay in installments, own at the end."})
+
+    # 3. PCP (Personal Contract Purchase)
+    pcp_score = 80 if depreciation_rate < 12 else 40
+    if depreciation_rate < 12:
+        advice += " Also, because this car holds its value well (low depreciation), PCP could offer very low monthly payments if you plan to swap it in 3 years."
+    options.append({"method": "PCP", "smart_score": pcp_score, "desc": "Lowest monthly payments, option to return."})
+
+    # Sort by smart score
+    options.sort(key=lambda x: x["smart_score"], reverse=True)
+    
+    return advice, options
