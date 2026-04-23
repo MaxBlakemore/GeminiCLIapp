@@ -553,7 +553,14 @@ function App() {
             {!showChat && (
               <div className="absolute bottom-0 inset-x-0 p-10 bg-[#0a0f1e]/80 backdrop-blur-xl border-t border-slate-800">
                 <button 
-                  onClick={() => setShowChat(true)}
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      setShowChat(true);
+                    } else {
+                      setSelectedCar(null); // Close modal to show login view behind
+                      setView('login');
+                    }
+                  }}
                   className="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-500 transition shadow-2xl shadow-indigo-600/30 flex items-center justify-center gap-3"
                 >
                   <MessageSquare size={22} /> Ask Finance Strategy
