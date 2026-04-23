@@ -3,7 +3,8 @@ import axios from 'axios';
 import { 
   Car, Search, TrendingUp, Zap, CreditCard, Banknote, X, ArrowRight, 
   ChevronRight, Info, BarChart3, BookOpen, LayoutGrid, Calculator as CalcIcon,
-  ShieldCheck, Wallet, Sparkles, MessageSquare, Send, Lock, User, LogOut
+  ShieldCheck, Wallet, Sparkles, MessageSquare, Send, Lock, User, LogOut,
+  UserPlus
 } from 'lucide-react';
 
 const API_URL = 'http://localhost:8000';
@@ -75,24 +76,27 @@ const MarketplaceView = ({ loading, cars, searchQuery, setSearchQuery, handleSea
   </div>
 );
 
-const LoginView = ({ setView, setIsLoggedIn, setUser }) => {
+const AuthView = ({ setView, setIsLoggedIn, setUser }) => {
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    const endpoint = isLogin ? '/login' : '/signup';
     try {
-      const response = await axios.post(`${API_URL}/login`, { email, password });
+      const response = await axios.post(`${API_URL}${endpoint}`, { email, password });
       setIsLoggedIn(true);
       setUser(response.data.user);
       localStorage.setItem('userToken', response.data.token);
-      setView('advisor'); // Redirect to chatbot after login
+      localStorage.setItem('userEmail', response.data.user.email);
+      setView('advisor'); 
     } catch (err) {
-      setError('Invalid email or password. Use user@example.com / password');
+      setError(err.response?.data?.detail || 'Authentication failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -103,20 +107,20 @@ const LoginView = ({ setView, setIsLoggedIn, setUser }) => {
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 p-10 rounded-[2.5rem] shadow-2xl">
         <div className="text-center mb-10">
           <div className="w-16 h-16 bg-indigo-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-400 border border-indigo-500/20">
-            <Lock size={32} />
+            {isLogin ? <Lock size={32} /> : <UserPlus size={32} />}
           </div>
-          <h2 className="text-3xl font-black text-white mb-2">Member Login</h2>
-          <p className="text-slate-500 text-sm">Unlock the Finance Strategy chatbot</p>
+          <h2 className="text-3xl font-black text-white mb-2">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+          <p className="text-slate-500 text-sm">{isLogin ? 'Sign in to access your advisor' : 'Join Wheels Brought Smarter'}</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Email Address</label>
             <div className="relative">
               <User className="absolute left-4 top-4 text-slate-600" size={20} />
               <input 
                 type="email" 
-                placeholder="user@example.com" 
+                placeholder="you@example.com" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-slate-800 border border-slate-700 rounded-2xl py-4 pl-12 pr-6 text-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
@@ -147,9 +151,18 @@ const LoginView = ({ setView, setIsLoggedIn, setUser }) => {
             disabled={loading}
             className="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-500 transition shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-3 disabled:opacity-50"
           >
-            {loading ? "Authenticating..." : "Sign In"} <ArrowRight size={22} />
+            {loading ? "Processing..." : (isLogin ? "Sign In" : "Create Account")} <ArrowRight size={22} />
           </button>
         </form>
+
+        <div className="mt-8 text-center">
+          <button 
+            onClick={() => {setIsLogin(!isLogin); setError('');}}
+            className="text-indigo-400 text-sm font-bold hover:text-indigo-300 transition"
+          >
+            {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -170,7 +183,7 @@ const FinanceAdvisorView = ({ chatHistory, setChatHistory, isTyping, setIsTyping
     try {
       const response = await axios.post(`${API_URL}/ask-finance`, {
         question: question,
-        car_id: 1 // Fallback car_id for general advisor
+        car_id: 1 
       });
       
       setTimeout(() => {
@@ -274,11 +287,11 @@ function App() {
 
   useEffect(() => {
     handleSearch();
-    // Simple check for persistent login
     const token = localStorage.getItem('userToken');
-    if (token) {
+    const email = localStorage.getItem('userEmail');
+    if (token && email) {
       setIsLoggedIn(true);
-      setUser({ email: 'user@example.com', name: 'Test User' });
+      setUser({ email });
     }
   }, []);
 
@@ -352,6 +365,7 @@ function App() {
     setIsLoggedIn(false);
     setUser(null);
     localStorage.removeItem('userToken');
+    localStorage.removeItem('userEmail');
     if (view === 'advisor') setView('marketplace');
   };
 
@@ -423,11 +437,11 @@ function App() {
               setIsTyping={setIsTyping}
             />
           ) : (
-            <LoginView setView={setView} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />
+            <AuthView setView={setView} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />
           )
         )}
         {view === 'guides' && <GuidesView />}
-        {view === 'login' && <LoginView setView={setView} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />}
+        {view === 'login' && <AuthView setView={setView} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />}
       </main>
 
       {/* Side Detail Panel / Modal */}

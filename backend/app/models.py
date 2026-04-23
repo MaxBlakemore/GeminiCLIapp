@@ -12,7 +12,6 @@ Base = declarative_base()
 
 class Car(Base):
     __tablename__ = "cars"
-
     id = Column(Integer, primary_key=True, index=True)
     make = Column(String)
     model = Column(String)
@@ -25,6 +24,12 @@ class Car(Base):
     body_type = Column(String, nullable=True) # e.g., SUV, Hatchback
     fuel_type = Column(String, nullable=True) # e.g., Petrol, Electric
     transmission = Column(String, nullable=True) # e.g., Automatic, Manual
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    password = Column(String) # In production, this must be hashed
 
 def get_db():
     db = SessionLocal()

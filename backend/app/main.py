@@ -56,14 +56,34 @@ def calculate_roi(request: schemas.ROICalculationRequest, db: Session = Depends(
     
     return result
 
-@app.post("/login")
-def login(request: dict):
+@app.post("/signup")
+def signup(request: dict, db: Session = Depends(get_db)):
     email = request.get("email")
     password = request.get("password")
     
-    # Mock authentication for development
-    if email == "user@example.com" and password == "password":
-        return {"user": {"email": email, "name": "Test User"}, "token": "mock-jwt-token"}
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password required")
+    
+    existing_user = db.query(models.User).filter(models.User.email == email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    new_user = models.User(email=email, password=password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return {"user": {"email": email}, "token": "mock-jwt-token"}
+
+@app.post("/login")
+def login(request: dict, db: Session = Depends(get_db)):
+    email = request.get("email")
+    password = request.get("password")
+    
+    user = db.query(models.User).filter(models.User.email == email, models.User.password == password).first()
+    
+    if user:
+        return {"user": {"email": user.email}, "token": "mock-jwt-token"}
     else:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
