@@ -8,7 +8,7 @@ import {
 
 const API_URL = 'http://localhost:8000';
 
-// --- View Components (Defined outside App to fix focus bug) ---
+// --- View Components ---
 
 const MarketplaceView = ({ loading, cars, searchQuery, setSearchQuery, handleSearch, openCarDetail }) => (
   <div className="animate-in fade-in duration-500">
@@ -75,43 +75,68 @@ const MarketplaceView = ({ loading, cars, searchQuery, setSearchQuery, handleSea
   </div>
 );
 
-const CalculatorView = ({ financeInputs, setFinanceInputs }) => (
-  <div className="animate-in slide-in-from-bottom-8 duration-700 max-w-4xl mx-auto py-12">
-    <div className="text-center mb-12">
-      <h2 className="text-4xl font-black text-white mb-4">Master ROI Calculator</h2>
-      <p className="text-slate-400">Tweak the numbers to see the true cost of car ownership over time.</p>
-    </div>
-    
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-      <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 space-y-6">
-        <h3 className="text-lg font-bold text-white flex items-center gap-2"><Sparkles className="text-indigo-400" size={20} /> Inputs</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Down Payment ($)</label>
-            <input type="number" value={financeInputs.down_payment} onChange={e => setFinanceInputs({...financeInputs, down_payment: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Interest Rate (%)</label>
-              <input type="number" step="0.1" value={financeInputs.interest_rate} onChange={e => setFinanceInputs({...financeInputs, interest_rate: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Loan Term (Yrs)</label>
-              <input type="number" value={financeInputs.loan_years} onChange={e => setFinanceInputs({...financeInputs, loan_years: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-            </div>
-          </div>
-        </div>
+const FinanceAdvisorView = ({ chatHistory, setChatHistory, isTyping, setIsTyping }) => {
+  const [question, setQuestion] = useState('');
+
+  const handleAsk = async (e) => {
+    if (e) e.preventDefault();
+    if (!question.trim()) return;
+
+    const userMsg = { role: 'user', content: question };
+    setChatHistory(prev => [...prev, userMsg]);
+    setQuestion('');
+    setIsTyping(true);
+
+    try {
+      const response = await axios.post(`${API_URL}/ask-finance`, {
+        question: question,
+        car_id: 1 // Fallback car_id for general advisor
+      });
+      
+      setTimeout(() => {
+        setChatHistory(prev => [...prev, { role: 'assistant', content: response.data.answer }]);
+        setIsTyping(false);
+      }, 600);
+    } catch (error) {
+      setChatHistory(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to my brain right now. Please try again later!" }]);
+      setIsTyping(false);
+    }
+  };
+
+  return (
+    <div className="animate-in slide-in-from-bottom-8 duration-700 max-w-3xl mx-auto py-12 flex flex-col h-[70vh]">
+      <div className="text-center mb-8">
+        <h2 className="text-4xl font-black text-white mb-2">Finance Strategy Advisor</h2>
+        <p className="text-slate-400">Ask general questions about PCP, HP, or leasing.</p>
       </div>
 
-      <div className="space-y-6 text-slate-400 leading-relaxed">
-        <div className="bg-indigo-600/10 p-6 rounded-2xl border border-indigo-500/20">
-          <h4 className="text-white font-bold mb-2 flex items-center gap-2"><Info size={18} /> Why this matters</h4>
-          <p className="text-sm">Most people focus on the monthly payment. We focus on the <strong>Net Resale Value</strong>—what's left in your pocket after you sell the car and pay off the remaining loan balance.</p>
+      <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-3xl p-8 overflow-y-auto mb-6 space-y-4">
+        <div className="bg-slate-800/50 p-4 rounded-2xl rounded-tl-none border border-slate-700 text-sm text-slate-300 max-w-[85%]">
+          Hello! I'm your general finance advisor. Not sure how PCP works? Wondering if a bank loan is better than dealership finance? Ask me anything!
         </div>
+        {chatHistory.map((msg, i) => (
+          <div key={i} className={`p-4 rounded-2xl text-sm max-w-[85%] ${msg.role === 'user' ? 'bg-indigo-600 text-white ml-auto rounded-tr-none' : 'bg-slate-800/50 text-slate-300 border border-slate-700 rounded-tl-none'}`}>
+            {msg.content}
+          </div>
+        ))}
+        {isTyping && <div className="text-slate-500 text-xs italic animate-pulse px-2">Advisor is typing...</div>}
       </div>
+
+      <form onSubmit={handleAsk} className="relative">
+        <input 
+          type="text" 
+          placeholder="e.g., How does a balloon payment work?" 
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          className="w-full bg-slate-800 border border-slate-700 rounded-2xl py-5 px-6 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-2xl"
+        />
+        <button type="submit" className="absolute right-3 top-3 bottom-3 bg-indigo-600 text-white px-6 rounded-xl flex items-center justify-center hover:bg-indigo-500 transition font-bold gap-2">
+          Ask <Send size={18} />
+        </button>
+      </form>
     </div>
-  </div>
-);
+  );
+};
 
 const GuidesView = () => (
   <div className="animate-in slide-in-from-bottom-8 duration-700 max-w-5xl mx-auto py-12">
@@ -154,6 +179,7 @@ function App() {
   const [showChat, setShowChat] = useState(false);
   const [chatQuestion, setChatQuestion] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
+  const [generalChatHistory, setGeneralChatHistory] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
 
   const [financeInputs, setFinanceInputs] = useState({
@@ -167,7 +193,6 @@ function App() {
     handleSearch();
   }, []);
 
-  // Recalculate when finance inputs change while a car is selected
   useEffect(() => {
     if (selectedCar) {
       handleCalculateROI(selectedCar);
@@ -251,7 +276,7 @@ function App() {
           <nav className="hidden md:flex bg-slate-900/50 border border-slate-800 p-1.5 rounded-2xl gap-1">
             {[
               { id: 'marketplace', label: 'Marketplace', icon: <LayoutGrid size={16} /> },
-              { id: 'calculator', label: 'ROI Calculator', icon: <CalcIcon size={16} /> },
+              { id: 'advisor', label: 'Finance Advisor', icon: <MessageSquare size={16} /> },
               { id: 'guides', label: 'Financing Guides', icon: <BookOpen size={16} /> }
             ].map(tab => (
               <button 
@@ -281,10 +306,12 @@ function App() {
             openCarDetail={openCarDetail} 
           />
         )}
-        {view === 'calculator' && (
-          <CalculatorView 
-            financeInputs={financeInputs} 
-            setFinanceInputs={setFinanceInputs} 
+        {view === 'advisor' && (
+          <FinanceAdvisorView 
+            chatHistory={generalChatHistory} 
+            setChatHistory={setGeneralChatHistory} 
+            isTyping={isTyping} 
+            setIsTyping={setIsTyping}
           />
         )}
         {view === 'guides' && <GuidesView />}
