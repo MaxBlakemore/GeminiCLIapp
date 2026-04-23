@@ -7,7 +7,7 @@ import {
   UserPlus
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://backend.my-new-app.orb.local:8000';
 
 // --- View Components ---
 
