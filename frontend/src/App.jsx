@@ -18,7 +18,7 @@ const MarketplaceView = ({ loading, cars, searchQuery, setSearchQuery, handleSea
         <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Buy with data.</span>
       </h2>
       <p className="text-slate-400 text-lg mb-10">
-        Search our database of vehicles with built-in depreciation and ROI tracking.
+        Search live listed vehicles and understand the best finance methods, average depreciation and cost over time
       </p>
 
       <form onSubmit={handleSearch} className="relative group max-w-2xl mx-auto">
