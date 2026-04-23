@@ -56,6 +56,17 @@ def calculate_roi(request: schemas.ROICalculationRequest, db: Session = Depends(
     
     return result
 
+@app.post("/login")
+def login(request: dict):
+    email = request.get("email")
+    password = request.get("password")
+    
+    # Mock authentication for development
+    if email == "user@example.com" and password == "password":
+        return {"user": {"email": email, "name": "Test User"}, "token": "mock-jwt-token"}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
 @app.post("/ask-finance")
 def ask_finance(request: dict, db: Session = Depends(get_db)):
     car_id = request.get("car_id")

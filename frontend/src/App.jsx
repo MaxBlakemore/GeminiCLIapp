@@ -3,7 +3,7 @@ import axios from 'axios';
 import { 
   Car, Search, TrendingUp, Zap, CreditCard, Banknote, X, ArrowRight, 
   ChevronRight, Info, BarChart3, BookOpen, LayoutGrid, Calculator as CalcIcon,
-  ShieldCheck, Wallet, Sparkles, MessageSquare, Send
+  ShieldCheck, Wallet, Sparkles, MessageSquare, Send, Lock, User, LogOut
 } from 'lucide-react';
 
 const API_URL = 'http://localhost:8000';
@@ -74,6 +74,86 @@ const MarketplaceView = ({ loading, cars, searchQuery, setSearchQuery, handleSea
     </div>
   </div>
 );
+
+const LoginView = ({ setView, setIsLoggedIn, setUser }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const response = await axios.post(`${API_URL}/login`, { email, password });
+      setIsLoggedIn(true);
+      setUser(response.data.user);
+      localStorage.setItem('userToken', response.data.token);
+      setView('advisor'); // Redirect to chatbot after login
+    } catch (err) {
+      setError('Invalid email or password. Use user@example.com / password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[70vh] flex items-center justify-center animate-in fade-in zoom-in-95 duration-500">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-800 p-10 rounded-[2.5rem] shadow-2xl">
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 bg-indigo-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-400 border border-indigo-500/20">
+            <Lock size={32} />
+          </div>
+          <h2 className="text-3xl font-black text-white mb-2">Member Login</h2>
+          <p className="text-slate-500 text-sm">Unlock the Finance Strategy chatbot</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Email Address</label>
+            <div className="relative">
+              <User className="absolute left-4 top-4 text-slate-600" size={20} />
+              <input 
+                type="email" 
+                placeholder="user@example.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-2xl py-4 pl-12 pr-6 text-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-4 text-slate-600" size={20} />
+              <input 
+                type="password" 
+                placeholder="••••••••" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-2xl py-4 pl-12 pr-6 text-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                required
+              />
+            </div>
+          </div>
+
+          {error && <p className="text-rose-400 text-xs font-bold px-1">{error}</p>}
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-indigo-500 transition shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-3 disabled:opacity-50"
+          >
+            {loading ? "Authenticating..." : "Sign In"} <ArrowRight size={22} />
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 const FinanceAdvisorView = ({ chatHistory, setChatHistory, isTyping, setIsTyping }) => {
   const [question, setQuestion] = useState('');
@@ -170,6 +250,9 @@ const GuidesView = () => (
 
 function App() {
   const [view, setView] = useState('marketplace'); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  
   const [cars, setCars] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
   const [roiResult, setRoiResult] = useState(null);
@@ -191,6 +274,12 @@ function App() {
 
   useEffect(() => {
     handleSearch();
+    // Simple check for persistent login
+    const token = localStorage.getItem('userToken');
+    if (token) {
+      setIsLoggedIn(true);
+      setUser({ email: 'user@example.com', name: 'Test User' });
+    }
   }, []);
 
   useEffect(() => {
@@ -259,6 +348,13 @@ function App() {
     }
   };
 
+  const handleSignOut = () => {
+    setIsLoggedIn(false);
+    setUser(null);
+    localStorage.removeItem('userToken');
+    if (view === 'advisor') setView('marketplace');
+  };
+
   return (
     <div className="min-h-screen bg-[#060b18] text-slate-200 font-sans">
       {/* Header */}
@@ -289,9 +385,21 @@ function App() {
             ))}
           </nav>
 
-          <button className="hidden lg:block bg-white text-slate-900 px-6 py-2.5 rounded-full text-sm font-bold hover:bg-slate-200 transition shadow-xl">
-            Sign In
-          </button>
+          {isLoggedIn ? (
+            <button 
+              onClick={handleSignOut}
+              className="hidden lg:flex items-center gap-2 bg-slate-800 text-slate-200 px-6 py-2.5 rounded-full text-sm font-bold hover:bg-slate-700 transition"
+            >
+              <LogOut size={16} /> Sign Out
+            </button>
+          ) : (
+            <button 
+              onClick={() => setView('login')}
+              className="hidden lg:block bg-white text-slate-900 px-6 py-2.5 rounded-full text-sm font-bold hover:bg-slate-200 transition shadow-xl"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </header>
 
@@ -307,14 +415,19 @@ function App() {
           />
         )}
         {view === 'advisor' && (
-          <FinanceAdvisorView 
-            chatHistory={generalChatHistory} 
-            setChatHistory={setGeneralChatHistory} 
-            isTyping={isTyping} 
-            setIsTyping={setIsTyping}
-          />
+          isLoggedIn ? (
+            <FinanceAdvisorView 
+              chatHistory={generalChatHistory} 
+              setChatHistory={setGeneralChatHistory} 
+              isTyping={isTyping} 
+              setIsTyping={setIsTyping}
+            />
+          ) : (
+            <LoginView setView={setView} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />
+          )
         )}
         {view === 'guides' && <GuidesView />}
+        {view === 'login' && <LoginView setView={setView} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />}
       </main>
 
       {/* Side Detail Panel / Modal */}
