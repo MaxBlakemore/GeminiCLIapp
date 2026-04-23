@@ -13,6 +13,12 @@ class CarBase(BaseModel):
     body_type: Optional[str] = None
     fuel_type: Optional[str] = None
     transmission: Optional[str] = None
+    engine_size: Optional[float] = None
+    power_bhp: Optional[int] = None
+    acceleration_0_60: Optional[float] = None
+    top_speed_mph: Optional[int] = None
+    doors: Optional[int] = None
+    seats: Optional[int] = None
 
 class CarCreate(CarBase):
     pass

@@ -4,7 +4,7 @@ import {
   Car, Search, TrendingUp, Zap, CreditCard, Banknote, X, ArrowRight, 
   ChevronRight, Info, BarChart3, BookOpen, LayoutGrid, Calculator as CalcIcon,
   ShieldCheck, Wallet, Sparkles, MessageSquare, Send, Lock, User, LogOut,
-  UserPlus
+  UserPlus, Gauge, Settings, Users, DoorOpen
 } from 'lucide-react';
 
 const API_URL = 'http://backend.my-new-app.orb.local:8000';
@@ -465,6 +465,41 @@ function App() {
                     </div>
                   </div>
 
+                  {/* SPECS SECTION */}
+                  <div className="space-y-4">
+                    <h3 className="text-white font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+                      <Settings size={16} /> Vehicle Specifications
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                        <div className="text-slate-500 text-[10px] font-bold uppercase mb-1 flex items-center gap-1"><Gauge size={12} /> BHP</div>
+                        <div className="text-white font-black">{selectedCar.power_bhp || 'N/A'}</div>
+                      </div>
+                      <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                        <div className="text-slate-500 text-[10px] font-bold uppercase mb-1 flex items-center gap-1"><Zap size={12} /> 0-60 MPH</div>
+                        <div className="text-white font-black">{selectedCar.acceleration_0_60 || 'N/A'}s</div>
+                      </div>
+                      <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                        <div className="text-slate-500 text-[10px] font-bold uppercase mb-1 flex items-center gap-1"><DoorOpen size={12} /> Doors</div>
+                        <div className="text-white font-black">{selectedCar.doors || 'N/A'}</div>
+                      </div>
+                      <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                        <div className="text-slate-500 text-[10px] font-bold uppercase mb-1 flex items-center gap-1"><Users size={12} /> Seats</div>
+                        <div className="text-white font-black">{selectedCar.seats || 'N/A'}</div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex justify-between items-center">
+                          <span className="text-slate-500 text-xs font-bold uppercase">Engine Size</span>
+                          <span className="text-white font-bold">{selectedCar.engine_size ? `${selectedCar.engine_size}L` : 'Electric'}</span>
+                       </div>
+                       <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex justify-between items-center">
+                          <span className="text-slate-500 text-xs font-bold uppercase">Top Speed</span>
+                          <span className="text-white font-bold">{selectedCar.top_speed_mph || 'N/A'} MPH</span>
+                       </div>
+                    </div>
+                  </div>
+
                   <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
                     <h3 className="text-white font-bold text-sm flex items-center gap-2 uppercase tracking-widest"><CalcIcon size={16} /> Adjust Deal Terms</h3>
                     <div className="grid grid-cols-3 gap-4">
@@ -557,7 +592,7 @@ function App() {
                     if (isLoggedIn) {
                       setShowChat(true);
                     } else {
-                      setSelectedCar(null); // Close modal to show login view behind
+                      setSelectedCar(null); 
                       setView('login');
                     }
                   }}

@@ -24,6 +24,12 @@ class Car(Base):
     body_type = Column(String, nullable=True) # e.g., SUV, Hatchback
     fuel_type = Column(String, nullable=True) # e.g., Petrol, Electric
     transmission = Column(String, nullable=True) # e.g., Automatic, Manual
+    engine_size = Column(Float, nullable=True) # e.g., 2.0
+    power_bhp = Column(Integer, nullable=True) # e.g., 184
+    acceleration_0_60 = Column(Float, nullable=True) # e.g., 6.5
+    top_speed_mph = Column(Integer, nullable=True) # e.g., 155
+    doors = Column(Integer, nullable=True) # e.g., 5
+    seats = Column(Integer, nullable=True) # e.g., 5
 
 class User(Base):
     __tablename__ = "users"

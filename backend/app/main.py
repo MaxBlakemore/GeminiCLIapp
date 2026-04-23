@@ -162,23 +162,23 @@ def seed_data(db: Session = Depends(get_db)):
     
     mock_cars = [
         # Premium SUVs
-        models.Car(make="Range Rover", model="Sport", year=2022, price=75000, mileage=12000, depreciation_rate=18, est_maintenance_yearly=1500, body_type="SUV", fuel_type="Diesel", transmission="Automatic"),
-        models.Car(make="BMW", model="X5", year=2021, price=55000, mileage=22000, depreciation_rate=15, est_maintenance_yearly=1200, body_type="SUV", fuel_type="Hybrid", transmission="Automatic"),
-        models.Car(make="Tesla", model="Model Y", year=2022, price=48000, mileage=8000, depreciation_rate=12, est_maintenance_yearly=300, body_type="SUV", fuel_type="Electric", transmission="Automatic"),
+        models.Car(make="Range Rover", model="Sport", year=2022, price=75000, mileage=12000, depreciation_rate=18, est_maintenance_yearly=1500, body_type="SUV", fuel_type="Diesel", transmission="Automatic", engine_size=3.0, power_bhp=300, acceleration_0_60=6.3, top_speed_mph=130, doors=5, seats=5),
+        models.Car(make="BMW", model="X5", year=2021, price=55000, mileage=22000, depreciation_rate=15, est_maintenance_yearly=1200, body_type="SUV", fuel_type="Hybrid", transmission="Automatic", engine_size=3.0, power_bhp=394, acceleration_0_60=5.6, top_speed_mph=146, doors=5, seats=5),
+        models.Car(make="Tesla", model="Model Y", year=2022, price=48000, mileage=8000, depreciation_rate=12, est_maintenance_yearly=300, body_type="SUV", fuel_type="Electric", transmission="Automatic", engine_size=0.0, power_bhp=450, acceleration_0_60=3.5, top_speed_mph=155, doors=5, seats=5),
         
         # Family Saloons/Hatchbacks
-        models.Car(make="Toyota", model="Camry", year=2022, price=28000, mileage=15000, depreciation_rate=10, est_maintenance_yearly=500, body_type="Sedan", fuel_type="Hybrid", transmission="Automatic"),
-        models.Car(make="Honda", model="Civic", year=2023, price=26000, mileage=5000, depreciation_rate=9, est_maintenance_yearly=400, body_type="Hatchback", fuel_type="Petrol", transmission="Manual"),
-        models.Car(make="Volkswagen", model="Golf", year=2021, price=22000, mileage=18000, depreciation_rate=13, est_maintenance_yearly=600, body_type="Hatchback", fuel_type="Petrol", transmission="Automatic"),
+        models.Car(make="Toyota", model="Camry", year=2022, price=28000, mileage=15000, depreciation_rate=10, est_maintenance_yearly=500, body_type="Sedan", fuel_type="Hybrid", transmission="Automatic", engine_size=2.5, power_bhp=218, acceleration_0_60=8.3, top_speed_mph=112, doors=4, seats=5),
+        models.Car(make="Honda", model="Civic", year=2023, price=26000, mileage=5000, depreciation_rate=9, est_maintenance_yearly=400, body_type="Hatchback", fuel_type="Petrol", transmission="Manual", engine_size=1.5, power_bhp=180, acceleration_0_60=7.5, top_speed_mph=130, doors=5, seats=5),
+        models.Car(make="Volkswagen", model="Golf", year=2021, price=22000, mileage=18000, depreciation_rate=13, est_maintenance_yearly=600, body_type="Hatchback", fuel_type="Petrol", transmission="Automatic", engine_size=1.5, power_bhp=150, acceleration_0_60=8.5, top_speed_mph=139, doors=5, seats=5),
         
         # Budget Options
-        models.Car(make="Ford", model="Fiesta", year=2019, price=9500, mileage=45000, depreciation_rate=14, est_maintenance_yearly=450, body_type="Hatchback", fuel_type="Petrol", transmission="Manual"),
-        models.Car(make="Dacia", model="Sandero", year=2021, price=8500, mileage=12000, depreciation_rate=11, est_maintenance_yearly=300, body_type="Hatchback", fuel_type="Petrol", transmission="Manual"),
-        models.Car(make="Hyundai", model="i10", year=2020, price=7500, mileage=30000, depreciation_rate=12, est_maintenance_yearly=350, body_type="Hatchback", fuel_type="Petrol", transmission="Manual"),
+        models.Car(make="Ford", model="Fiesta", year=2019, price=9500, mileage=45000, depreciation_rate=14, est_maintenance_yearly=450, body_type="Hatchback", fuel_type="Petrol", transmission="Manual", engine_size=1.0, power_bhp=100, acceleration_0_60=10.5, top_speed_mph=113, doors=5, seats=5),
+        models.Car(make="Dacia", model="Sandero", year=2021, price=8500, mileage=12000, depreciation_rate=11, est_maintenance_yearly=300, body_type="Hatchback", fuel_type="Petrol", transmission="Manual", engine_size=0.9, power_bhp=90, acceleration_0_60=11.7, top_speed_mph=109, doors=5, seats=5),
+        models.Car(make="Hyundai", model="i10", year=2020, price=7500, mileage=30000, depreciation_rate=12, est_maintenance_yearly=350, body_type="Hatchback", fuel_type="Petrol", transmission="Manual", engine_size=1.0, power_bhp=67, acceleration_0_60=14.6, top_speed_mph=97, doors=5, seats=5),
         
         # Performance / Fun
-        models.Car(make="Porsche", model="911", year=2020, price=95000, mileage=15000, depreciation_rate=8, est_maintenance_yearly=2500, body_type="Coupe", fuel_type="Petrol", transmission="Automatic"),
-        models.Car(make="Mazda", model="MX-5", year=2021, price=24000, mileage=10000, depreciation_rate=11, est_maintenance_yearly=500, body_type="Convertible", fuel_type="Petrol", transmission="Manual"),
+        models.Car(make="Porsche", model="911", year=2020, price=95000, mileage=15000, depreciation_rate=8, est_maintenance_yearly=2500, body_type="Coupe", fuel_type="Petrol", transmission="Automatic", engine_size=3.0, power_bhp=450, acceleration_0_60=3.4, top_speed_mph=191, doors=2, seats=4),
+        models.Car(make="Mazda", model="MX-5", year=2021, price=24000, mileage=10000, depreciation_rate=11, est_maintenance_yearly=500, body_type="Convertible", fuel_type="Petrol", transmission="Manual", engine_size=2.0, power_bhp=184, acceleration_0_60=6.5, top_speed_mph=136, doors=2, seats=2),
     ]
     db.add_all(mock_cars)
     db.commit()
