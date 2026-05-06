@@ -5,3 +5,5 @@ node_modules/
 dist/
 .env
 postgres_data/
+gh_actions_key
+gh_actions_key.pub
