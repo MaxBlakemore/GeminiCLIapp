@@ -7,7 +7,7 @@ import {
   UserPlus, Gauge, Settings, Users, DoorOpen
 } from 'lucide-react';
 
-const API_URL = 'http://backend.my-new-app.orb.local:8000';
+const API_URL = 'http://34.171.87.124:8000';
 
 // --- View Components ---
 
