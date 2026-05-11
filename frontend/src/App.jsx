@@ -110,7 +110,7 @@ const AuthView = ({ setView, setIsLoggedIn, setUser }) => {
             {isLogin ? <Lock size={32} /> : <UserPlus size={32} />}
           </div>
           <h2 className="text-3xl font-black text-white mb-2">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-          <p className="text-slate-500 text-sm">{isLogin ? 'Sign in to access your advisor' : 'Join Wheels Brought Smarter'}</p>
+          <p className="text-slate-500 text-sm">{isLogin ? 'Sign in to access your advisor' : 'Join Wheels Bought Smarter'}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -379,7 +379,7 @@ function App() {
               <Car className="text-white" size={24} />
             </div>
             <h1 className="text-xl font-black tracking-tight text-white uppercase">
-              Wheels <span className="text-indigo-400 font-medium lowercase italic">Brought Smarter</span>
+              Wheels <span className="text-indigo-400 font-medium lowercase italic">Bought Smarter</span>
             </h1>
           </div>
           

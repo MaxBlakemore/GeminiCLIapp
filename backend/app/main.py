@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Wheels Brought Smarter API")
+app = FastAPI(title="Wheels Bought Smarter API")
 
 @app.on_event("startup")
 def startup_event():
