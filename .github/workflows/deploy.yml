@@ -28,7 +28,7 @@ jobs:
       - name: Deploy application
         run: |
           # Copy project files to VM
-          rsync -avz --exclude '.git' --exclude 'node_modules' --exclude 'gh_actions_key*' -e "ssh -i ~/.ssh/id_ed25519" . ${{ secrets.GCP_USER }}@${{ secrets.GCP_VM_IP }}:~/my-new-app
+          /usr/bin/rsync -avz --exclude '.git' --exclude 'node_modules' --exclude 'gh_actions_key*' -e "ssh -i ~/.ssh/id_ed25519" . ${{ secrets.GCP_USER }}@${{ secrets.GCP_VM_IP }}:~/my-new-app
 
           # Create .env file from secrets
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.GCP_USER }}@${{ secrets.GCP_VM_IP }} "echo 'POSTGRES_USER=${{ secrets.POSTGRES_USER }}' > ~/my-new-app/.env"
