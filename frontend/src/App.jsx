@@ -7,7 +7,7 @@ import {
   UserPlus, Gauge, Settings, Users, DoorOpen
 } from 'lucide-react';
 
-const API_URL = 'http://34.171.87.124:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // --- View Components ---
 
