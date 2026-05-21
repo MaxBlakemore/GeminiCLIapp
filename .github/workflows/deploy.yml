@@ -26,9 +26,7 @@ jobs:
           WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
           TAG: my-app-image
-          # You need to define the POLICY variable in your environment or replace it here
-          POLICY: "Default project policy"
-        run: ./wizcli scan container-image $TAG --policies "$POLICY"
+        run: ./wizcli scan container-image $TAG
   deploy:
     runs-on: ubuntu-latest
     needs: wiz-scan
