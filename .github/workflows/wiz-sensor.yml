@@ -27,7 +27,7 @@ jobs:
           VM_NAME: ${{ secrets.GCP_VM_NAME }}
           ZONE: ${{ secrets.GCP_ZONE }}
         run: |
-          gcloud compute ssh $VM_NAME --zone=$ZONE --command="
+          gcloud compute ssh ${{ secrets.GCP_USER }}@$VM_NAME --zone=$ZONE --command="
             export WIZ_API_CLIENT_ID='$WIZ_CLIENT_ID'
             export WIZ_API_CLIENT_SECRET='$WIZ_CLIENT_SECRET'
             curl -sL https://downloads.wiz.io/sensor/install.sh | sudo -E bash
