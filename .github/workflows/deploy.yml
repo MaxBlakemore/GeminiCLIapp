@@ -71,5 +71,3 @@ jobs:
           # Run docker-compose on VM
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.GCP_USER }}@${{ secrets.GCP_VM_IP }} "cd ~/my-new-app && sudo docker compose up -d --build"
 
-          # Seed the database
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.GCP_USER }}@${{ secrets.GCP_VM_IP }} "sudo docker exec my-new-app-backend-1 python -m seed_db"

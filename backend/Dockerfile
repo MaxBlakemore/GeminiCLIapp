@@ -9,6 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+RUN chmod +x /app/wait-for-it.sh
 
 # Change ownership and switch to non-root user
 RUN chown -R appuser:appuser /app
