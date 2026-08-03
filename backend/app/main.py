@@ -156,6 +156,7 @@ def search_cars(
 
 @app.post("/seed")
 def seed_data(db: Session = Depends(get_db)):
+    print("Seeding data...")
     # Simple seeder for development
     if db.query(models.Car).count() > 0:
         db.query(models.Car).delete() # Reset for now to ensure new fields are populated
