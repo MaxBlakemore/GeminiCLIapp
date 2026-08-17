@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SCAN_PATH: "."              # Set the relative path to scan
-      POLICY: "Default IaC policy" # Set your desired Wiz CLI policy
+      POLICY:  # Set your desired Wiz CLI policy
     defaults:
       run:
         shell: bash
