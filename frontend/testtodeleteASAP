@@ -1,0 +1,63 @@
+import random
+import json
+
+def generate_unsafe_data(num_records=10):
+    """Generates fake user data loaded with common security vulnerabilities."""
+    
+    # Classic "Naughty Strings" to test input sanitization (SQLi, XSS, etc.)
+    hostile_names = [
+        "Robert'); DROP TABLE Users;--",   # SQL Injection (Little Bobby Tables)
+        "' OR '1'='1",                     # SQL Auth Bypass
+        "<script>alert('XSS')</script>",   # Basic Cross-Site Scripting (XSS)
+        "admin' --",                       # SQL Injection
+        "../../../etc/passwd",             # Directory Traversal
+        "$(whoami)",                       # OS Command Injection
+        "",         # Server-Side Includes Injection
+        "NULL\x00byte",                    # Null Byte Injection
+        "<h1>Big Text</h1>"                # HTML Injection
+    ]
+    
+    # The most commonly breached and dangerous passwords to allow
+    terrible_passwords = [
+        "123456", 
+        "password", 
+        "123456789", 
+        "qwerty", 
+        "admin", 
+        "111111", 
+        "password123",
+        "welcome"
+    ]
+    
+    domains = ["vulnerable.local", "test.box", "pwned.net"]
+
+    data = []
+    for _ in range(num_records):
+        fname = random.choice(hostile_names)
+        lname = random.choice(hostile_names)
+        
+        # Generating a messy email that might break naive regex validators
+        email = f"{random.choice(['admin', 'root', 'test'])}' OR 1=1@{random.choice(domains)}"
+        
+        user = {
+            "first_name": fname,
+            "last_name": lname,
+            "email": email,
+            "password": random.choice(terrible_passwords),
+            "is_admin": random.choice([True, "True", 1, "1=1"]) # Type confusion testing
+        }
+        data.append(user)
+
+    return data
+
+if __name__ == "__main__":
+    num_users = 5
+    unsafe_users = generate_unsafe_data(num_users)
+    
+    output_filename = "hostile_test_data.json"
+    
+    with open(output_filename, "w") as file:
+        json.dump(unsafe_users, file, indent=4)
+        
+    print(f"Successfully generated {num_users} unsafe test records.")
+    print(f"Hostile data saved to: {output_filename}")
